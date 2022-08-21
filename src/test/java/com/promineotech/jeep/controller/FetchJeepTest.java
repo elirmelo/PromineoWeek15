@@ -1,7 +1,6 @@
 package com.promineotech.jeep.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.util.LinkedList;
@@ -19,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
-import com.promineotech.jeep.controller.support.FetchJeepTestSupport;
 import com.promineotech.jeep.entity.Jeep;
 import com.promineotech.jeep.entity.JeepModel;
 
@@ -45,19 +43,23 @@ class FetchJeepTest { //extends FetchJeepTestSupport{
     //Given: a valid model, trim and URI
     JeepModel model = JeepModel.WRANGLER;
     String trim = "Sport";
-    String uri = String.format("http://localhost:%d/jeeps?model=%s&trim=%s", serverPort, model, trim);
+    String url = String.format("http://localhost:%d/jeeps?model=%s&trim=%s", serverPort, model, trim);
     
     //When: a connection is made to the URI
     ResponseEntity<List<Jeep>> response = 
-        restTemplate.exchange(uri, HttpMethod.GET, null, 
+        restTemplate.exchange(url, HttpMethod.GET, null, 
             new ParameterizedTypeReference<>() {});
     
     //Then: a success (Ok - 200) status code is returned
    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK); 
    
    //And: the actual list returned is the same expected
+   List<Jeep> actual = response.getBody();
    List<Jeep> expected = buildExpected();
-   assertThat(response.getBody()).isEqualTo(expected);
+   
+   
+   actual.forEach(jeep -> jeep.setModelPK(null));
+   assertThat(actual).isEqualTo(expected);
   }
   
   
